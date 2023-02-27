@@ -70,7 +70,7 @@ WITH pre_camp AS (
     WHERE p.created_at <= '2018-12-01'
       AND p.created_at >= '2018-10-01'
 ),
-     post_camp AS (
+post_camp AS (
          SELECT  o.parent_vertical
                 ,DATE_DIFF(cast(charge_date AS date), cast(p.created_at AS date), DAY) AS days_diff
          FROM gc_paysvc_live.payments p
@@ -113,7 +113,6 @@ FROM (
          GROUP BY o.parent_vertical
      )
 ORDER BY rank
-
 ;
 
 
