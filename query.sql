@@ -41,38 +41,36 @@ FROM (
 
 --Campaign analysis
 WITH pre_campaign_payments AS (
-    SELECT 
-    COUNT(DISTINCT CASE WHEN created_at < '2018-12-01' THEN id END) AS pre_campaign_count
+    SELECT COUNT(DISTINCT CASE WHEN created_at <= '2018-12-01' AND created_at >= '2018-10-01' THEN id END) AS pre_campaign_count
     FROM gc_paysvc_live.payments
 ),
 post_campaign_payments AS (
-    SELECT 
-    COUNT(DISTINCT CASE WHEN created_at >= '2018-12-01' THEN id END) AS post_campaign_count
+    SELECT COUNT(DISTINCT CASE WHEN created_at >= '2018-12-01' AND created_at <= '2019-02-01' THEN id END) AS post_campaign_count
     FROM gc_paysvc_live.payments
 )
 SELECT
-     pre.pre_campaign_count
+    pre.pre_campaign_count
     ,post.post_campaign_count
-    ,(post.post_campaign_count - pre.pre_campaign_count)                                 AS increase_in_payments
-    ,(post.post_campaign_count - pre.pre_campaign_count) / (pre.pre_campaign_count)      AS percent_increase
+    ,(post.post_campaign_count - pre.pre_campaign_count)                                        AS increase_in_payments
+    ,ROUND((post.post_campaign_count - pre.pre_campaign_count) / (pre.pre_campaign_count), 2)   AS percent_increase
 FROM pre_campaign_payments pre, post_campaign_payments post
-;
---Campaign wasn't efective
+--Campaign was efective
 
 
 --On which vertical should the company focus next?
-SELECT parent_vertical,
-       num_usages,
-       avg_amount,
-       total_amount,
-       num_organizations,
-       RANK() OVER (ORDER BY num_usages DESC, total_amount DESC, avg_amount DESC, num_organizations DESC) AS rank
+SELECT
+        parent_vertical
+       ,num_usages
+       ,ROUND(avg_amount, 2)                                                                                AS avg_amount
+       ,ROUND(total_amount, 2)                                                                              AS total_amount
+       ,num_organizations
+       ,RANK() OVER (ORDER BY num_usages DESC, total_amount DESC, avg_amount DESC, num_organizations DESC)  AS rank
 FROM (
-         SELECT o.parent_vertical,
-                COUNT(DISTINCT m.id)              AS num_usages,
-                AVG(p.amount)                     AS avg_amount,
-                SUM(p.amount)                     AS total_amount,
-                COUNT(DISTINCT m.organisation_id) AS num_organizations,
+         SELECT  o.parent_vertical
+                ,COUNT(DISTINCT m.id)              AS num_usages
+                ,AVG(p.amount)                     AS avg_amount
+                ,SUM(p.amount)                     AS total_amount
+                ,COUNT(DISTINCT m.organisation_id) AS num_organizations
          FROM gc_paysvc_live.organisations o
                   JOIN gc_paysvc_live.mandates m
                        ON o.id = m.organisation_id
@@ -81,6 +79,7 @@ FROM (
          GROUP BY o.parent_vertical
      )
 ORDER BY rank
+
 ;
 
 
