@@ -61,8 +61,7 @@ FROM pre_campaign_payments pre, post_campaign_payments post
 -- Although the difference between when the payments were made and when charged increased after the campaign launch
 WITH pre_camp AS (
     SELECT   o.parent_vertical
-            ,DATE_DIFF(cast(charge_date AS date) 
-            ,cast(p.created_at AS date), DAY) AS days_diff
+            ,DATE_DIFF(cast(charge_date AS date), cast(p.created_at AS date), DAY) AS days_diff
     FROM gc_paysvc_live.payments p
              LEFT JOIN gc_paysvc_live.mandates m
                        on p.mandate_id = m.id
@@ -72,9 +71,8 @@ WITH pre_camp AS (
       AND p.created_at >= '2018-10-01'
 ),
      post_camp AS (
-         SELECT  o.parent_vertical,
-                ,DATE_DIFF(cast(charge_date AS date)
-                ,cast(p.created_at AS date), DAY) AS days_diff
+         SELECT  o.parent_vertical
+                ,DATE_DIFF(cast(charge_date AS date), cast(p.created_at AS date), DAY) AS days_diff
          FROM gc_paysvc_live.payments p
                   LEFT JOIN gc_paysvc_live.mandates m
                             on p.mandate_id = m.id
