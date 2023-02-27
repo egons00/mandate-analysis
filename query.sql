@@ -82,9 +82,9 @@ WITH pre_camp AS (
            AND p.created_at <= '2019-02-01'
      )
 
-SELECT  pc.parent_vertical
-       ,round(avg(pc.days_diff), 1)  AS before
-       ,round(avg(poc.days_diff), 1) AS after
+SELECT  pc.parent_vertical                              AS parent_vertical
+       ,CONCAT(ROUND(avg(pc.days_diff), 1),' days')     AS before
+       ,CONCAT(ROUND(avg(poc.days_diff), 1), ' days')   AS after
 FROM pre_camp pc
 LEFT JOIN post_camp poc
 ON pc.parent_vertical = poc.parent_vertical
