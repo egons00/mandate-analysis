@@ -54,7 +54,43 @@ SELECT
     ,(post.post_campaign_count - pre.pre_campaign_count)                                        AS increase_in_payments
     ,ROUND((post.post_campaign_count - pre.pre_campaign_count) / (pre.pre_campaign_count), 2)   AS percent_increase
 FROM pre_campaign_payments pre, post_campaign_payments post
+--Payment count increased by 23%
 --Campaign was efective
+
+
+-- Although the difference between when the payments were made and when charged increased after the campaign launch
+WITH pre_camp AS (
+    SELECT   o.parent_vertical
+            ,DATE_DIFF(cast(charge_date AS date) 
+            ,cast(p.created_at AS date), DAY) AS days_diff
+    FROM gc_paysvc_live.payments p
+             LEFT JOIN gc_paysvc_live.mandates m
+                       on p.mandate_id = m.id
+             JOIN gc_paysvc_live.organisations o ON
+        m.organisation_id = o.id
+    WHERE p.created_at <= '2018-12-01'
+      AND p.created_at >= '2018-10-01'
+),
+     post_camp AS (
+         SELECT  o.parent_vertical,
+                ,DATE_DIFF(cast(charge_date AS date)
+                ,cast(p.created_at AS date), DAY) AS days_diff
+         FROM gc_paysvc_live.payments p
+                  LEFT JOIN gc_paysvc_live.mandates m
+                            on p.mandate_id = m.id
+                  JOIN gc_paysvc_live.organisations o ON
+             m.organisation_id = o.id
+         WHERE p.created_at >= '2018-12-01'
+           AND p.created_at <= '2019-02-01'
+     )
+
+SELECT  pc.parent_vertical
+       ,round(avg(pc.days_diff), 1)  AS before
+       ,round(avg(poc.days_diff), 1) AS after
+FROM pre_camp pc
+LEFT JOIN post_camp poc
+ON pc.parent_vertical = poc.parent_vertical
+GROUP BY 1
 
 
 --On which vertical should the company focus next?
