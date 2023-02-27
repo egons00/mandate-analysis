@@ -94,10 +94,10 @@ GROUP BY 1
 --On which vertical should the company focus next?
 SELECT
         parent_vertical
-       ,num_usages
-       ,ROUND(avg_amount, 2)                                                                                AS avg_amount
-       ,ROUND(total_amount, 2)                                                                              AS total_amount
-       ,num_organizations
+       ,num_usages                                                                                          AS distinct_mandates
+       ,ROUND(avg_amount, 2)                                                                                AS avg_amount_paid
+       ,ROUND(total_amount, 2)                                                                              AS total_revenue_amount
+       ,num_organizations                                                                                   AS organizations_assigned
        ,RANK() OVER (ORDER BY num_usages DESC, total_amount DESC, avg_amount DESC, num_organizations DESC)  AS rank
 FROM (
          SELECT  o.parent_vertical
